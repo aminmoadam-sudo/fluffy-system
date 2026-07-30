@@ -72,6 +72,7 @@
   .product .role { font-size: 8.5px; color: var(--muted); }
 
   .wordmarks { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6mm; }
+  .wordmarks-4 { grid-template-columns: repeat(4, 1fr); } /* use when colorway tiles are folded into this row — see SKILL.md */
   .wm { border: 1px solid var(--border); border-radius: 8px; padding: 6mm; background: var(--surface); display: flex; flex-direction: column; gap: 6px; min-height: 30mm; justify-content: center; }
   .wm .lockup { display: flex; align-items: center; gap: 10px; }
   .wm .name { font-weight: 800; font-size: 18px; letter-spacing: 4px; color: var(--text); text-transform: uppercase; }
@@ -79,16 +80,45 @@
   .wm .tag { font-size: 10px; color: var(--muted); line-height: 1.4; }
   .wm .mono { font-family: var(--mono-font); font-size: 8.5px; color: var(--muted); letter-spacing: 1.2px; text-transform: uppercase; margin-top: auto; display: block; }
 
+  /*
+    LOGO LOCKUP — mark SVG + real text, not traced text-paths.
+    See SKILL.md § Logo Handling: only fall back to this real-text pattern when the
+    supplied logo SVG shows trace bleed (many overlapping near-duplicate shade paths
+    in the wordmark). If the traced wordmark is clean, just use {{LOGO_SVG}} whole.
+  */
+  .logo-lockup { display: flex; flex-direction: column; align-items: center; --lw: 20mm; }
+  .logo-lockup .lockup-mark { width: var(--lw); }
+  .logo-lockup .lockup-mark svg { width: 100%; display: block; }
+  .logo-lockup .lockup-text { text-align: center; margin-top: calc(var(--lw) * -0.05); }
+  .logo-lockup .lt-top { font-family: var(--display-font); font-weight: 800; text-transform: uppercase; letter-spacing: 0.04em; font-size: calc(var(--lw) * 0.155); line-height: 1; }
+  .logo-lockup .lt-bottom { font-family: var(--display-font); font-weight: 500; text-transform: uppercase; letter-spacing: 0.34em; font-size: calc(var(--lw) * 0.06); margin-top: calc(var(--lw) * 0.04); }
+  .logo-lockup.on-dark .lt-top, .logo-lockup.on-dark .lt-bottom { color: var(--text); }
+  .logo-lockup.on-light .lt-top, .logo-lockup.on-light .lt-bottom { color: {{LOGO_ON_LIGHT_TEXT_HEX}}; } /* the dark ink color from the brand's light-surface colorway */
+
   .foot { display: flex; justify-content: space-between; align-items: flex-end; margin-top: auto; padding-top: 4mm; border-top: 1px solid var(--border); font-family: var(--mono-font); font-size: 8.5px; color: var(--muted); letter-spacing: 1.2px; text-transform: uppercase; }
 </style>
 </head>
 <body>
+<!--
+  LOGO SPRITE (optional) — define the mark once here as <symbol>s, reuse via <use>
+  everywhere it appears (head, colorway tiles, wordmark lockup). Only needed once
+  the mark shows up more than one place in the file — see SKILL.md § Logo Handling.
+-->
+<svg style="display:none" aria-hidden="true">
+  <symbol id="mark-on-light" viewBox="0 0 100 100">{{MARK_ONLY_SVG_PATHS_ON_LIGHT}}</symbol>
+  <symbol id="mark-on-dark" viewBox="0 0 100 100">{{MARK_ONLY_SVG_PATHS_ON_DARK}}</symbol>
+</svg>
 <div class="page">
 
   <!-- HEAD -->
   <div class="head">
     <div class="brand">
-      <!-- Replace with the brand's actual logo SVG -->
+      <!-- Replace with the brand's actual logo SVG. If it's clean, use it whole.
+           If the wordmark shows trace bleed, use the .logo-lockup pattern instead:
+           <div class="logo-lockup on-dark" style="--lw:16mm;">
+             <div class="lockup-mark"><svg viewBox="0 0 100 100"><use href="#mark-on-dark"/></svg></div>
+             <div class="lockup-text"><div class="lt-top">{{BRAND_NAME}}</div><div class="lt-bottom">{{BRAND_SUBNAME}}</div></div>
+           </div> -->
       {{LOGO_SVG}}
       <div>
         <h1>{{BRAND_NAME}} Brand Book</h1>
@@ -145,14 +175,28 @@
     </div>
   </div>
 
-  <!-- WORDMARKS -->
+  <!--
+    WORDMARKS (+ LOGO COLOR VARIANTS if the brand has 2+ official colorways)
+    Only add the two colorway tiles below if the brand actually supplies multiple
+    colorways — don't invent a second one. When you do add them, switch the grid
+    to .wordmarks-4 so everything still fits on one page (see SKILL.md § Output 2).
+  -->
   <div>
     <div class="section-label">Wordmarks · Lockups</div>
-    <div class="wordmarks">
-      <div class="wm">
-        <div class="lockup">{{LOGO_SVG_SMALL}} <span class="name">{{BRAND_NAME_UPPER}}</span></div>
-        <p class="tag">{{LOCKUP_1_NOTE}}</p>
-        <span class="mono">Mark + wordmark</span>
+    <div class="wordmarks wordmarks-4"> <!-- drop "wordmarks-4" and the two colorway tiles below if there's only one colorway -->
+      <div class="wm" style="background:{{LOGO_LIGHT_SURFACE_HEX}};">
+        <div class="logo-lockup on-light" style="--lw:14mm;">
+          <div class="lockup-mark"><svg viewBox="0 0 100 100"><use href="#mark-on-light"/></svg></div>
+          <div class="lockup-text"><div class="lt-top">{{BRAND_NAME}}</div><div class="lt-bottom">{{BRAND_SUBNAME}}</div></div>
+        </div>
+        <span class="mono" style="color:{{LOGO_LIGHT_SURFACE_MUTED_HEX}};">Colorway A — light surfaces</span>
+      </div>
+      <div class="wm" style="background:var(--bg);">
+        <div class="logo-lockup on-dark" style="--lw:14mm;">
+          <div class="lockup-mark"><svg viewBox="0 0 100 100"><use href="#mark-on-dark"/></svg></div>
+          <div class="lockup-text"><div class="lt-top">{{BRAND_NAME}}</div><div class="lt-bottom">{{BRAND_SUBNAME}}</div></div>
+        </div>
+        <span class="mono">Colorway B — dark surfaces</span>
       </div>
       <div class="wm">
         <div class="lockup"><span class="name">{{UMBRELLA_PART1}}<span class="lo">{{UMBRELLA_PART2}}</span></span></div>

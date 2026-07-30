@@ -24,13 +24,14 @@ Both outputs are self-contained HTML (Google Fonts CDN + inline CSS + inline SVG
    - Fonts (check `<link>` tags, CSS font-family declarations, or visual identification)
    - Tagline / value prop
    - Any documented principles
-   - Logo / mark (grab as inline SVG if the reference has one)
+   - Logo / mark (grab as inline SVG if the reference has one — see **Logo Handling** below for traced/raster-derived SVGs)
    - Theme direction (light / dark / which surfaces are used)
 3. **Confirm extraction.** Short message listing what you found. Ask only for the gaps.
 4. **Generate both files** into a `design/` folder.
-5. **Render the PDF** via headless Edge/Chrome.
-6. **Show the user.** Send the PDF and the design-system.html.
-7. **Iterate** on feedback.
+5. **Verify.** Screenshot both files (full-page for overflow/overlap, plus a zoomed crop of the logo if it renders at a prominent size) before rendering the PDF.
+6. **Render the PDF** via headless Edge/Chrome.
+7. **Show the user.** Send the PDF and the design-system.html.
+8. **Iterate** on feedback.
 
 ---
 
@@ -48,6 +49,25 @@ Both outputs are self-contained HTML (Google Fonts CDN + inline CSS + inline SVG
 
 ---
 
+## Logo Handling
+
+Logos deserve extra care because auto-vectorized SVGs (traced from a PNG/JPG by a tool) commonly carry two problems that a straight "use the exact SVG" pass will miss.
+
+**Bleed from traced text.** A vectorizer often represents anti-aliased text as many overlapping, near-duplicate solid-fill paths (one per shade band) rather than one clean shape per letter. At small display sizes this is invisible; scaled up in a header or a large lockup it reads as visible ghosting/fringing on the wordmark. Before using a traced logo at a prominent size, check the wordmark's paths: if the text region has many (roughly 10+) closely-spaced fill colors on nearly-overlapping geometry, that's a trace artifact, not a design choice.
+
+- **Fix:** keep the icon/mark exactly as traced — marks are usually a handful of clean, well-separated paths and rarely have this problem. Rebuild the wordmark text as real HTML/CSS text in a Google Font matching the traced letterforms (weight, case, tracking) instead of using the traced text paths.
+- **Only fix what's actually broken.** If the wordmark is a genuinely custom illustrated logotype (not set in an existing typeface), rebuilding it as text would lose real brand identity. Apply the text-rebuild fix only when the many-overlapping-paths symptom is present — confirm it visually (zoom in) before assuming.
+
+**Partial color variants.** When a user supplies multiple exports representing different official colorways of the same mark, a vectorizer can lose an entire colorway's shapes if they're close to the trace's background color (e.g. a white-on-white mark merges into the canvas, leaving only a small accent color as surviving paths). Don't discard an incomplete file — treat it as evidence, not garbage:
+
+- The colors that *did* survive are real information about that colorway's accent/highlight treatment.
+- Reconstruct the missing shapes by taking the *other*, complete colorway's real path geometry and recoloring it to match — never invent new shapes, only recolor verified real geometry pulled from a sibling export.
+- Tell the user plainly what was directly extracted vs. what you inferred, and offer to swap in a better export if they have one.
+
+**Sprite reuse.** If the same mark appears more than once in a file (header, colorway tiles, wordmark lockups), define it once as an SVG `<symbol>` in a hidden sprite near the top of `<body>` — `<svg style="display:none"><symbol id="...">...</symbol></svg>` — and reference it elsewhere with `<use href="#...">`. Traced marks can carry hundreds of path commands; repeating that inline at every placement bloats the file for no benefit.
+
+---
+
 ## Output 1: `design-system.html` (scrollable reference page)
 
 Sections in this order (drop any for which there's no source material):
@@ -59,8 +79,9 @@ Sections in this order (drop any for which there's no source material):
 5. **Principles** — whatever the brand documents
 6. **Components** — buttons, cards, badges styled in the brand's language
 7. **Icons** — whatever icon language the brand uses (inline SVG, pixel art, line, filled, etc)
-8. **Wordmarks / Lockups** — 2–3 name treatments based on the brand's mark + wordmark
-9. **Footer** — file path, version, any cross-reference note
+8. **Logo Color Variants** *(only if the brand supplies 2+ official colorways)* — the mark on its light-surface treatment and its dark-surface treatment side by side, each on its real background, with hex swatches underneath. Skip entirely for single-colorway brands — don't invent a second colorway that wasn't supplied.
+9. **Wordmarks / Lockups** — 2–3 name treatments based on the brand's mark + wordmark
+10. **Footer** — file path, version, any cross-reference note
 
 Match the brand's surfaces (light vs dark), radius, border treatment, and type hierarchy. If the brand is rounded and soft, don't default to sharp. If the brand is maximalist, don't make it minimal.
 
@@ -84,7 +105,7 @@ A **single A4 portrait page** (210mm × 297mm) — the brand topline in one glan
 2. **Color Hierarchy** — 3 swatch tiles (Primary / Secondary / Tertiary) using the brand's actual colors
 3. **Two-column middle** — Typography card (brand's fonts) + Principles card (brand's documented principles)
 4. **Team / Product row** (optional) — 6 small tiles if the brand has a product family
-5. **Wordmarks · Lockups** — 3 tiles showing name treatments
+5. **Wordmarks · Lockups** — 3 tiles showing name treatments. If the brand also has 2+ official colorways, fold them into this same row instead of adding a new section: expand the grid to 4 columns and lead with a light-surface tile and a dark-surface tile (each showing the mark on its real background) before the name-treatment tiles. This keeps the colorway info on the page without breaking the one-page budget.
 6. **Footer** — file path + cross-reference note
 
 ### Rendering to PDF
@@ -142,3 +163,5 @@ See `examples/template.html` for a structural skeleton with placeholder tokens (
 - **Fit on one A4 page.** If content overflows, tighten padding or drop a section.
 - **Self-contained HTML.** Google Fonts CDN + inline CSS + inline SVG. No build step.
 - **Render the PDF.** Don't just hand over HTML — finish the job with headless Edge/Chrome.
+- **Verify at zoomed scale, not just full-page.** Full-page screenshots catch overflow and overlap; they don't catch logo bleed. Whenever a logo renders at a prominent size (header, hero, colorway tile), also capture a close-up crop and look for ghosting, fringing, or doubled outlines before shipping — see **Logo Handling**.
+- **Don't guess at incomplete source files.** A partial or degenerate trace (see **Logo Handling**) is a clue to investigate, not a reason to invent — reconstruct only from real geometry you can point to.
