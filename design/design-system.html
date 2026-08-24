@@ -1,0 +1,392 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>CTP — Design System</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:ital,wght@0,400..900;1,400..900&family=Inter:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --black:#000000;
+    --white:#ffffff;
+    --gray-900:#0a0a0a;
+    --gray-800:#1c1c1c;
+    --gray-700:#333333;
+    --gray-600:#4d4d4d;
+    --gray-500:#6e6e6e;
+    --gray-400:#8c8c8c;
+    --gray-300:#b3b3b3;
+    --gray-200:#d9d9d9;
+    --gray-100:#f2f2f2;
+
+    --bg:#000000;
+    --surface:#0e0e0e;
+    --surface-2:#161616;
+    --border:#2a2a2a;
+    --text:#ffffff;
+    --muted:#9a9a9a;
+
+    --display: 'Big Shoulders Display', sans-serif;
+    --body: 'Inter', sans-serif;
+    --mono: 'Space Mono', monospace;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:var(--body);}
+  body{padding-bottom:80px;}
+  img,svg{max-width:100%;display:block;}
+  a{color:inherit;}
+
+  .wrap{max-width:1100px;margin:0 auto;padding:0 28px;}
+  section{padding:72px 0;border-bottom:1px solid var(--border);}
+  section:first-of-type{border-top:none;}
+
+  .eyebrow{
+    font-family:var(--mono);
+    font-size:11px;
+    letter-spacing:3px;
+    text-transform:uppercase;
+    color:var(--gray-400);
+    margin:0 0 14px;
+  }
+  .eyebrow::before{content:"// ";color:var(--white);}
+
+  h2{
+    font-family:var(--display);
+    font-style:italic;
+    font-weight:800;
+    font-size:clamp(32px,5vw,52px);
+    letter-spacing:-0.01em;
+    margin:0 0 40px;
+    text-transform:uppercase;
+  }
+
+  /* HEADER */
+  .hero{
+    min-height:78vh;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    position:relative;
+    border-bottom:1px solid var(--border);
+    overflow:hidden;
+  }
+  .hero-inner{max-width:1100px;margin:0 auto;padding:0 28px;width:100%;}
+  .hero .mark-wrap{width:min(720px,88vw);margin-bottom:36px;}
+  .hero .meta-row{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:20px;margin-top:24px;}
+  .hero .full-name{
+    font-family:var(--display);
+    font-style:italic;
+    font-weight:600;
+    font-size:clamp(16px,2.2vw,22px);
+    letter-spacing:0.02em;
+    color:var(--gray-300);
+    text-transform:uppercase;
+  }
+  .hero .full-name b{color:var(--white);font-weight:800;}
+  .hero .ver{font-family:var(--mono);font-size:11px;color:var(--gray-500);letter-spacing:1.5px;text-transform:uppercase;text-align:right;}
+
+  /* COLOR HIERARCHY */
+  .colors{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;}
+  .swatch{border:1px solid var(--border);border-radius:2px;overflow:hidden;}
+  .swatch .fill{height:140px;position:relative;}
+  .swatch .fill .tier-lbl{
+    position:absolute;bottom:14px;left:16px;
+    font-family:var(--display);font-style:italic;font-weight:800;
+    font-size:22px;text-transform:uppercase;letter-spacing:0.02em;
+  }
+  .swatch .meta{padding:16px;background:var(--surface);border-top:1px solid var(--border);}
+  .swatch .hex{font-family:var(--mono);font-size:13px;letter-spacing:1px;color:var(--white);display:block;}
+  .swatch .use{font-size:13px;color:var(--muted);line-height:1.5;margin-top:8px;}
+
+  .ext-grid{display:grid;grid-template-columns:repeat(9,1fr);gap:0;border:1px solid var(--border);margin-top:20px;}
+  .ext-cell{aspect-ratio:1/1.1;display:flex;align-items:flex-end;padding:8px;position:relative;border-right:1px solid var(--border);}
+  .ext-cell:last-child{border-right:none;}
+  .ext-cell span{font-family:var(--mono);font-size:9px;letter-spacing:0.5px;}
+
+  /* TYPOGRAPHY */
+  .type-block{margin-bottom:44px;}
+  .type-sample{
+    font-family:var(--display);font-style:italic;font-weight:900;
+    font-size:clamp(48px,8vw,110px);line-height:0.95;letter-spacing:-0.01em;
+    text-transform:uppercase;margin:0 0 12px;
+  }
+  .type-tag{font-family:var(--mono);font-size:11px;color:var(--gray-400);letter-spacing:2px;text-transform:uppercase;}
+  .weight-ladder{display:flex;flex-direction:column;gap:2px;margin-top:28px;border-top:1px solid var(--border);}
+  .weight-row{display:flex;align-items:baseline;justify-content:space-between;padding:14px 0;border-bottom:1px solid var(--border);}
+  .weight-row .w-sample{font-family:var(--display);font-style:italic;font-size:30px;text-transform:uppercase;}
+  .weight-row .w-label{font-family:var(--mono);font-size:11px;color:var(--gray-500);letter-spacing:1.5px;}
+
+  .body-sample{font-family:var(--body);font-size:16px;line-height:1.7;color:var(--gray-300);max-width:640px;margin-top:28px;}
+  .body-sample b{color:var(--white);font-weight:700;}
+  .mono-sample{font-family:var(--mono);font-size:13px;color:var(--gray-300);margin-top:20px;letter-spacing:0.5px;}
+
+  /* VOICE / TONE */
+  .voice-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+  .voice-card{border:1px solid var(--border);padding:28px;background:var(--surface);}
+  .voice-card .vt{font-family:var(--display);font-style:italic;font-weight:800;font-size:26px;text-transform:uppercase;margin-bottom:10px;}
+  .voice-card p{font-size:14px;color:var(--muted);line-height:1.6;margin:0;}
+  .voice-tags{display:flex;flex-wrap:wrap;gap:10px;margin-top:28px;}
+  .voice-tag{border:1px solid var(--border);padding:8px 16px;font-family:var(--mono);font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--gray-300);}
+
+  /* COMPONENTS */
+  .comp-row{display:flex;flex-wrap:wrap;gap:16px;align-items:center;margin-bottom:36px;}
+  .btn{
+    font-family:var(--display);font-style:italic;font-weight:800;
+    font-size:15px;text-transform:uppercase;letter-spacing:0.03em;
+    padding:15px 30px;border:2px solid var(--white);cursor:pointer;
+    transition:all .15s ease;
+  }
+  .btn-primary{background:var(--white);color:var(--black);}
+  .btn-primary:hover{background:var(--black);color:var(--white);}
+  .btn-outline{background:transparent;color:var(--white);}
+  .btn-outline:hover{background:var(--white);color:var(--black);}
+  .btn-ghost{border-color:var(--gray-600);color:var(--gray-300);}
+
+  .badge{
+    display:inline-flex;align-items:center;gap:6px;
+    font-family:var(--mono);font-size:11px;letter-spacing:1.5px;text-transform:uppercase;
+    padding:6px 12px;border:1px solid var(--border);color:var(--gray-300);
+  }
+  .badge::before{content:"";width:6px;height:6px;background:var(--white);border-radius:50%;}
+  .badge.dim::before{background:var(--gray-500);}
+
+  .card-row{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:8px;}
+  .demo-card{border:1px solid var(--border);padding:26px;background:var(--surface);position:relative;overflow:hidden;}
+  .demo-card::before{
+    content:"";position:absolute;top:0;left:0;width:3px;height:100%;background:var(--white);
+  }
+  .demo-card .dc-tag{font-family:var(--mono);font-size:10px;letter-spacing:2px;color:var(--gray-500);text-transform:uppercase;}
+  .demo-card h3{font-family:var(--display);font-style:italic;font-weight:800;font-size:24px;text-transform:uppercase;margin:10px 0 8px;}
+  .demo-card p{font-size:13px;color:var(--muted);line-height:1.5;margin:0;}
+
+  /* ICONS */
+  .icon-row{display:flex;flex-wrap:wrap;gap:28px;}
+  .icon-tile{display:flex;flex-direction:column;align-items:center;gap:10px;width:88px;}
+  .icon-tile svg{width:40px;height:40px;}
+  .icon-tile span{font-family:var(--mono);font-size:9px;color:var(--gray-500);letter-spacing:1px;text-transform:uppercase;text-align:center;}
+
+  /* WORDMARKS */
+  .wm-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:20px;}
+  .wm-card{border:1px solid var(--border);padding:32px;min-height:150px;display:flex;flex-direction:column;justify-content:center;gap:10px;}
+  .wm-card.on-white{background:var(--white);color:var(--black);}
+  .wm-card.on-black{background:var(--black);}
+  .wm-lockup{font-family:var(--display);font-style:italic;font-weight:900;font-size:38px;letter-spacing:0.01em;text-transform:uppercase;}
+  .wm-lockup .lo{font-weight:400;opacity:0.5;}
+  .wm-note{font-family:var(--mono);font-size:10px;letter-spacing:1.5px;text-transform:uppercase;opacity:0.55;}
+  .wm-split{font-size:34px;}
+  .wm-split .heavy{font-weight:900;}
+  .wm-split .light{font-weight:400;opacity:0.4;}
+
+  footer{padding:36px 0;}
+  .foot-row{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;font-family:var(--mono);font-size:11px;color:var(--gray-500);letter-spacing:1.5px;text-transform:uppercase;}
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-inner">
+    <div class="mark-wrap">
+      <svg viewBox="0 0 900 320">
+        <defs>
+          <pattern id="stripe-hero" width="10" height="10" patternUnits="userSpaceOnUse">
+            <rect width="10" height="5" fill="#fff"/>
+            <rect y="5" width="10" height="5" fill="#000"/>
+          </pattern>
+          <mask id="stripe-mask-hero">
+            <rect x="0" y="0" width="900" height="320" fill="url(#stripe-hero)"/>
+          </mask>
+          <linearGradient id="fade-hero" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="230" y2="0">
+            <stop offset="0%" stop-color="#fff" stop-opacity="0"/>
+            <stop offset="100%" stop-color="#fff" stop-opacity="1"/>
+          </linearGradient>
+        </defs>
+        <rect x="0" y="0" width="900" height="320" fill="#000"/>
+        <g stroke="url(#fade-hero)" stroke-width="7">
+          <line x1="0" y1="78"  x2="230" y2="78"/>
+          <line x1="30" y1="95"  x2="220" y2="95"/>
+          <line x1="60" y1="112" x2="210" y2="112"/>
+          <line x1="90" y1="129" x2="200" y2="129"/>
+          <line x1="115" y1="146" x2="195" y2="146"/>
+          <line x1="130" y1="163" x2="190" y2="163"/>
+          <line x1="130" y1="180" x2="190" y2="180"/>
+          <line x1="115" y1="197" x2="195" y2="197"/>
+          <line x1="90" y1="214" x2="200" y2="214"/>
+          <line x1="60" y1="231" x2="210" y2="231"/>
+          <line x1="30" y1="248" x2="220" y2="248"/>
+          <line x1="0" y1="265" x2="230" y2="265"/>
+        </g>
+        <text x="160" y="270" font-family="'Big Shoulders Display', sans-serif" font-weight="900" font-style="italic" font-size="300" fill="#fff" mask="url(#stripe-mask-hero)">CTP</text>
+      </svg>
+    </div>
+    <div class="meta-row">
+      <div class="full-name"><b>Collect</b> The <b>Profit</b> — Brand Design System</div>
+      <div class="ver">v1.0 · 2026<br/>Monochrome Identity</div>
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <!-- COLOR HIERARCHY -->
+  <section>
+    <p class="eyebrow">01 — Foundations</p>
+    <h2>Color Hierarchy</h2>
+    <div class="colors">
+      <div class="swatch">
+        <div class="fill" style="background:var(--black);"><span class="tier-lbl" style="color:#fff;">Primary</span></div>
+        <div class="meta"><span class="hex">#000000 — JET BLACK</span><span class="use">Dominant surface. Every backdrop, every hero panel, every button that means business.</span></div>
+      </div>
+      <div class="swatch">
+        <div class="fill" style="background:var(--white);"><span class="tier-lbl" style="color:#000;">Secondary</span></div>
+        <div class="meta"><span class="hex">#FFFFFF — PURE WHITE</span><span class="use">Type, marks, and outlines against black. Reversed, it becomes the surface.</span></div>
+      </div>
+      <div class="swatch">
+        <div class="fill" style="background:var(--gray-500);"><span class="tier-lbl" style="color:#000;">Tertiary</span></div>
+        <div class="meta"><span class="hex">#6E6E6E — STEEL GRAY</span><span class="use">Supporting text, dividers, disabled states. Never a third "color" — a shade of the other two.</span></div>
+      </div>
+    </div>
+
+    <p class="eyebrow" style="margin-top:48px;">Extended Grayscale</p>
+    <div class="ext-grid">
+      <div class="ext-cell" style="background:#0a0a0a;"><span style="color:#666;">0A0A0A</span></div>
+      <div class="ext-cell" style="background:#1c1c1c;"><span style="color:#777;">1C1C1C</span></div>
+      <div class="ext-cell" style="background:#333333;"><span style="color:#999;">333333</span></div>
+      <div class="ext-cell" style="background:#4d4d4d;"><span style="color:#ccc;">4D4D4D</span></div>
+      <div class="ext-cell" style="background:#6e6e6e;"><span style="color:#111;">6E6E6E</span></div>
+      <div class="ext-cell" style="background:#8c8c8c;"><span style="color:#111;">8C8C8C</span></div>
+      <div class="ext-cell" style="background:#b3b3b3;"><span style="color:#111;">B3B3B3</span></div>
+      <div class="ext-cell" style="background:#d9d9d9;"><span style="color:#111;">D9D9D9</span></div>
+      <div class="ext-cell" style="background:#f2f2f2;"><span style="color:#111;">F2F2F2</span></div>
+    </div>
+  </section>
+
+  <!-- TYPOGRAPHY -->
+  <section>
+    <p class="eyebrow">02 — Type</p>
+    <h2>Typography</h2>
+
+    <div class="type-block">
+      <p class="type-tag">Display — Big Shoulders Display, Italic 900</p>
+      <p class="type-sample">Collect The<br/>Profit.</p>
+      <p class="type-tag">Condensed, italic, heavyweight — matches the logo's forward lean and speed-line energy. Reserved for headlines, the wordmark, and hard CTAs.</p>
+    </div>
+
+    <div class="weight-ladder">
+      <div class="weight-row"><span class="w-sample" style="font-weight:400;">Scale Fast</span><span class="w-label">400 · Italic</span></div>
+      <div class="weight-row"><span class="w-sample" style="font-weight:600;">Scale Fast</span><span class="w-label">600 · Italic</span></div>
+      <div class="weight-row"><span class="w-sample" style="font-weight:800;">Scale Fast</span><span class="w-label">800 · Italic</span></div>
+      <div class="weight-row"><span class="w-sample" style="font-weight:900;">Scale Fast</span><span class="w-label">900 · Italic</span></div>
+    </div>
+
+    <div class="type-block" style="margin-top:48px;">
+      <p class="type-tag">Body — Inter</p>
+      <p class="body-sample">CTP builds the systems that turn <b>coaches with an audience</b> into coaches with a business. Clean grotesk, upright, no drama — it carries the plan while the display face carries the punch. <b>Used for</b> body copy, UI text, and anything that needs to be read fast and trusted immediately.</p>
+    </div>
+
+    <div class="mono-sample">SPACE MONO — LABELS, EYEBROWS, DATA, TIMESTAMPS, SECTION MARKERS</div>
+  </section>
+
+  <!-- VOICE & TONE -->
+  <section>
+    <p class="eyebrow">03 — Voice</p>
+    <h2>Voice &amp; Tone</h2>
+    <div class="voice-grid">
+      <div class="voice-card">
+        <div class="vt">Aggressive &amp; High-Performance</div>
+        <p>Bold, direct, results-obsessed. Every line reads like it's chasing a number. No hedging, no "maybe" — CTP talks like the speed lines on its own mark: forward motion, nothing trailing behind.</p>
+      </div>
+      <div class="voice-card">
+        <div class="vt">Premium &amp; Elite</div>
+        <p>Polished, exclusive, built for coaches scaling into seven and eight figures. The confidence of a brand that doesn't need to shout to be taken seriously — restraint reads as authority.</p>
+      </div>
+    </div>
+    <div class="voice-tags">
+      <span class="voice-tag">Direct</span>
+      <span class="voice-tag">Relentless</span>
+      <span class="voice-tag">No-Fluff</span>
+      <span class="voice-tag">High-Ticket</span>
+      <span class="voice-tag">Results-First</span>
+      <span class="voice-tag">Momentum</span>
+    </div>
+  </section>
+
+  <!-- COMPONENTS -->
+  <section>
+    <p class="eyebrow">04 — Components</p>
+    <h2>Components</h2>
+
+    <p class="type-tag" style="margin-bottom:16px;">Buttons</p>
+    <div class="comp-row">
+      <button class="btn btn-primary">Collect The Profit</button>
+      <button class="btn btn-outline">Book A Call</button>
+      <button class="btn btn-ghost">Learn More</button>
+    </div>
+
+    <p class="type-tag" style="margin-bottom:16px;">Badges</p>
+    <div class="comp-row">
+      <span class="badge">Active Client</span>
+      <span class="badge dim">Onboarding</span>
+      <span class="badge">7-Figure Track</span>
+    </div>
+
+    <p class="type-tag" style="margin-bottom:16px;">Cards</p>
+    <div class="card-row">
+      <div class="demo-card"><span class="dc-tag">Offer</span><h3>Scale System</h3><p>The full-funnel build for coaches ready to leave manual sales calls behind.</p></div>
+      <div class="demo-card"><span class="dc-tag">Metric</span><h3>+312%</h3><p>Average revenue lift across active CTP client accounts, trailing 90 days.</p></div>
+      <div class="demo-card"><span class="dc-tag">Status</span><h3>Locked In</h3><p>Every engagement starts with a black-and-white breakdown of the numbers.</p></div>
+    </div>
+  </section>
+
+  <!-- ICONS -->
+  <section>
+    <p class="eyebrow">05 — Icons</p>
+    <h2>Icon Language</h2>
+    <p class="type-tag" style="margin-bottom:24px;">Thin-line, geometric, 1.5px stroke — no fill, no color. Reads as precision instrumentation, not decoration.</p>
+    <div class="icon-row">
+      <div class="icon-tile"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.5"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/></svg><span>Growth</span></div>
+      <div class="icon-tile"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg><span>Speed</span></div>
+      <div class="icon-tile"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="1"/><path d="M8 12h8M12 8v8"/></svg><span>System</span></div>
+      <div class="icon-tile"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.5"><path d="M12 2l2.5 7H21l-5.5 4.5L17.5 21 12 16.5 6.5 21l2-7.5L3 9h6.5z"/></svg><span>Elite</span></div>
+      <div class="icon-tile"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.5"><path d="M3 21h18M6 21V10l6-6 6 6v11"/></svg><span>Scale</span></div>
+      <div class="icon-tile"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.5"><path d="M4 19V5M4 19h16M9 15l3-4 3 3 4-6"/></svg><span>Profit</span></div>
+    </div>
+  </section>
+
+  <!-- WORDMARKS -->
+  <section>
+    <p class="eyebrow">06 — Wordmarks &amp; Lockups</p>
+    <h2>Wordmarks</h2>
+    <p class="type-tag" style="margin-bottom:24px;">Note: the source logo was supplied as a flattened image, not a vector file. The mark above is a CSS/SVG reconstruction matching its condensed italic wordmark, horizontal stripe texture, and left-trailing speed lines — swap in the original vector export for pixel-exact production use.</p>
+    <div class="wm-grid">
+      <div class="wm-card on-black">
+        <div class="wm-lockup">CTP</div>
+        <span class="wm-note">Primary Mark — On Black</span>
+      </div>
+      <div class="wm-card on-white">
+        <div class="wm-lockup">CTP</div>
+        <span class="wm-note">Reversed Mark — On White</span>
+      </div>
+      <div class="wm-card on-black">
+        <div class="wm-lockup wm-split"><span class="heavy">Collect</span><span class="light">TheProfit</span></div>
+        <span class="wm-note">Split-Weight Lockup</span>
+      </div>
+      <div class="wm-card on-black">
+        <div class="wm-lockup" style="font-size:26px;letter-spacing:0.28em;">C · T · P</div>
+        <span class="wm-note">Spaced Monogram — Small-Scale Use</span>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="foot-row">
+      <span>CTP — Collect The Profit / Design System</span>
+      <span>design/design-system.html · v1.0</span>
+    </div>
+  </footer>
+</div>
+
+</body>
+</html>
