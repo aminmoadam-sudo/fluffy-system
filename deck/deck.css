@@ -1,0 +1,301 @@
+/* =====================================================================
+   DECK STYLES — slide types, slide window, presenter window, print.
+   ===================================================================== */
+
+@font-face {
+  font-family: 'InterDeck';
+  src: url('fonts/inter-latin-var.woff2') format('woff2');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: block;
+}
+
+:root {
+  --bg: #0A0A0B;
+  --fg: #F2F2F0;
+  --accent: #D08A2E;    /* deep amber: active states and numbers only */
+  --muted: #8C8C88;
+  --dim: #55554F;
+  --faint: #2A2A2B;
+  --well: #121213;
+  --fade: 150ms;        /* set from FADE_MS in engine.js */
+  --font: 'InterDeck', 'Inter', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  height: 100%;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font);
+  font-optical-sizing: auto;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow: hidden;
+}
+
+/* ---------------------------------------------------------------------
+   Slide window
+   --------------------------------------------------------------------- */
+#viewport { position: fixed; inset: 0; background: var(--bg); }
+#stage {
+  position: absolute;
+  left: 50%; top: 50%;
+  width: 1920px; height: 1080px;
+  transform-origin: 50% 50%;
+}
+#blank {
+  position: fixed; inset: 0;
+  background: #000;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--fade) linear;
+  z-index: 10;
+}
+#blank.on { opacity: 1; }
+body.idle, body.idle * { cursor: none !important; }
+
+/* ---------------------------------------------------------------------
+   Slide base (always rendered at 1920×1080, scaled from outside)
+   --------------------------------------------------------------------- */
+.slide {
+  position: absolute;
+  left: 0; top: 0;
+  width: 1920px; height: 1080px;
+  background: var(--bg);
+  color: var(--fg);
+  overflow: hidden;
+  opacity: 1;
+  transition: opacity var(--fade) linear;
+}
+.slide.entering { opacity: 0; }
+.slide [data-step] { opacity: 0; transition: opacity var(--fade) linear; }
+.slide [data-step].on { opacity: 1; }
+.slide.static, .slide.static * { transition: none !important; }
+
+[data-fit] { display: inline-block; white-space: nowrap; flex-shrink: 0; }
+[data-fit].wrap { white-space: normal; text-wrap: balance; }
+
+/* STATEMENT */
+.t-statement {
+  display: flex; align-items: center; justify-content: center;
+  padding: 0 160px;
+  text-align: center;
+}
+.statement-text {
+  font-size: 130px;
+  font-weight: 600;
+  letter-spacing: -0.035em;
+  line-height: 1.04;
+}
+
+/* IMAGE */
+.t-image { display: flex; align-items: center; justify-content: center; }
+.img-slot { position: relative; background: var(--well); }
+.img-slot.loaded { background: transparent; }
+.img-slot img { display: block; width: 100%; height: 100%; object-fit: contain; user-select: none; }
+.img-placeholder {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 20px;
+  outline: 1px solid var(--faint); outline-offset: -1px;
+  text-align: center;
+  padding: 0 120px;
+}
+.ph-label { font-size: 44px; font-weight: 500; color: var(--muted); letter-spacing: -0.01em; }
+.ph-meta { font-size: 32px; color: var(--dim); font-variant-numeric: tabular-nums; }
+.img-caption {
+  position: absolute; left: 96px; bottom: 96px;
+  background: var(--bg);
+  padding: 20px 28px;
+  font-size: 36px; font-weight: 500; letter-spacing: -0.01em;
+}
+
+/* DIAGRAM */
+.t-diagram {
+  display: flex; flex-direction: column;
+  padding: 140px 160px;
+}
+.diagram-title { font-size: 40px; font-weight: 500; color: var(--muted); letter-spacing: -0.005em; }
+.diagram-body { flex: 1; display: flex; align-items: center; justify-content: center; min-width: 0; }
+
+.flow { display: inline-flex; align-items: center; font-size: 80px; }
+.flow-node { display: flex; flex-direction: column; gap: 24px; }
+.flow-num {
+  font-size: 32px; font-weight: 500; color: var(--accent);
+  font-variant-numeric: tabular-nums; letter-spacing: 0.02em;
+}
+.flow-label { font-size: 1em; font-weight: 600; letter-spacing: -0.03em; line-height: 1; }
+.flow-arrow, .spine-arrow {
+  position: relative;
+  width: 88px; height: 2px;
+  margin: 0 40px;
+  background: var(--dim);
+  flex-shrink: 0;
+}
+.flow-arrow { align-self: flex-end; margin-bottom: 0.5em; }
+.flow-arrow::after, .spine-arrow::after {
+  content: '';
+  position: absolute; right: 0; top: 50%;
+  width: 16px; height: 16px;
+  border-top: 2px solid var(--dim);
+  border-right: 2px solid var(--dim);
+  transform: translate(1px, -50%) rotate(45deg);
+  transform-origin: 50% 50%;
+}
+
+.rows { width: 100%; display: flex; flex-direction: column; }
+.row {
+  display: flex; align-items: baseline; gap: 56px;
+  padding: 36px 0;
+  border-top: 1px solid var(--faint);
+}
+.row:last-child { border-bottom: 1px solid var(--faint); }
+.row-num { font-size: 40px; font-weight: 500; color: var(--accent); font-variant-numeric: tabular-nums; width: 64px; }
+.row-text { font-size: 64px; font-weight: 600; letter-spacing: -0.025em; line-height: 1.1; }
+
+.diagram-html { font-size: 56px; }
+
+/* STAT */
+.t-stat {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 0 160px;
+  text-align: center;
+}
+.stat-value {
+  font-size: 320px;
+  font-weight: 600;
+  letter-spacing: -0.05em;
+  line-height: 0.9;
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+}
+.stat-label { margin-top: 56px; font-size: 56px; font-weight: 500; letter-spacing: -0.02em; }
+.stat-source {
+  position: absolute; left: 0; right: 0; bottom: 88px;
+  font-size: 32px; color: var(--dim);
+}
+
+/* SECTION */
+.t-section {
+  display: flex; align-items: center; justify-content: center;
+  padding: 0 160px;
+}
+.spine { display: inline-flex; align-items: center; font-size: 104px; }
+.spine-stage {
+  font-weight: 600; text-transform: uppercase;
+  letter-spacing: -0.01em; line-height: 1;
+  color: var(--faint);
+}
+.spine-stage.past { color: var(--dim); }
+.spine-stage.lit { color: var(--accent); }
+.spine-arrow { background: var(--faint); }
+.spine-arrow::after { border-color: var(--faint); }
+
+/* ---------------------------------------------------------------------
+   Grid overview (Esc / G)
+   --------------------------------------------------------------------- */
+#grid {
+  position: fixed; inset: 0;
+  z-index: 20;
+  display: none;
+  overflow: auto;
+  background: var(--bg);
+  padding: 56px;
+}
+#grid.open { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 40px 32px; align-content: start; }
+.thumb-wrap { cursor: pointer; }
+.thumb-num {
+  font-size: 14px; color: var(--dim); margin-bottom: 10px;
+  font-variant-numeric: tabular-nums; letter-spacing: 0.06em;
+}
+.thumb { position: relative; aspect-ratio: 16 / 9; overflow: hidden; }
+.thumb .slide { transform-origin: 0 0; pointer-events: none; }
+.thumb-wrap.sel .thumb { outline: 2px solid var(--accent); outline-offset: 4px; }
+.thumb-wrap.sel .thumb-num { color: var(--accent); }
+
+/* ---------------------------------------------------------------------
+   Presenter window
+   --------------------------------------------------------------------- */
+.p-root {
+  height: 100vh;
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: 24px 32px;
+  padding: 24px 28px;
+}
+.p-current { grid-column: 1; grid-row: 1; }
+.p-notes-wrap { grid-column: 1; grid-row: 2; display: flex; flex-direction: column; min-height: 0; }
+.p-side { grid-column: 2; grid-row: 1 / span 2; display: flex; flex-direction: column; gap: 28px; min-height: 0; }
+
+.p-label {
+  font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.14em;
+  color: var(--dim); margin-bottom: 10px;
+}
+.preview { position: relative; aspect-ratio: 16 / 9; overflow: hidden; background: var(--bg); }
+/* hairline frame drawn above the slide inside */
+.preview::after, .thumb::after {
+  content: ''; position: absolute; inset: 0; z-index: 3;
+  border: 1px solid var(--faint); pointer-events: none;
+}
+.preview .slide { transform-origin: 0 0; }
+.preview-end {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; color: var(--dim); letter-spacing: 0.14em; text-transform: uppercase;
+}
+.p-blank {
+  position: absolute; inset: 0; z-index: 2;
+  background: #000;
+  display: none; align-items: center; justify-content: center;
+  font-size: 14px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent);
+}
+.p-blank.on { display: flex; }
+
+.p-notes {
+  flex: 1; min-height: 0; overflow: auto;
+  font-size: 26px; line-height: 1.5;
+  white-space: pre-wrap;
+  max-width: 60ch;
+  padding-right: 12px;
+}
+.p-notes.empty { color: var(--dim); }
+.p-warn { color: var(--accent); font-size: 16px; line-height: 1.5; margin-bottom: 16px; white-space: pre-wrap; }
+.p-warn:empty { display: none; }
+
+.p-meta { display: flex; flex-direction: column; gap: 22px; }
+.p-timer { font-size: 76px; font-weight: 600; letter-spacing: -0.03em; line-height: 1; font-variant-numeric: tabular-nums; }
+.p-counter { font-size: 28px; font-weight: 500; font-variant-numeric: tabular-nums; }
+.p-counter .p-build { color: var(--muted); margin-left: 16px; font-size: 20px; }
+.p-section { font-size: 20px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; }
+.p-range { font-size: 18px; color: var(--muted); font-variant-numeric: tabular-nums; margin-top: 6px; }
+.p-pace { font-size: 24px; font-weight: 500; margin-top: 10px; font-variant-numeric: tabular-nums; }
+.p-pace.over { color: var(--accent); }
+
+.p-foot { margin-top: auto; display: flex; flex-direction: column; gap: 10px; }
+.p-link { font-size: 14px; color: var(--muted); }
+.p-link.down { color: var(--accent); }
+.p-keys { font-size: 12px; color: var(--dim); letter-spacing: 0.02em; line-height: 1.6; }
+
+/* ---------------------------------------------------------------------
+   Print — one slide per page, every build shown, no notes, no UI.
+   --------------------------------------------------------------------- */
+#print {
+  position: absolute; left: -40000px; top: 0;
+  visibility: hidden; pointer-events: none;
+}
+.print-page { position: relative; width: 1920px; height: 1080px; overflow: hidden; }
+
+@page { size: 1920px 1080px; margin: 0; }
+
+@media print {
+  html, body { height: auto; overflow: visible; background: var(--bg); }
+  * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  #viewport, #blank, #grid, .p-root { display: none !important; }
+  #print { position: static; left: auto; visibility: visible; }
+  .print-page { break-after: page; page-break-after: always; }
+  .print-page:last-child { break-after: auto; page-break-after: auto; }
+}
