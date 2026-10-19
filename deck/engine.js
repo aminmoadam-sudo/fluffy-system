@@ -19,7 +19,7 @@
   const LINK_TIMEOUT_MS = 2500;
   const IS_PRESENTER = location.hash === '#presenter';
   const TYPES = ['image', 'statement', 'diagram', 'stat', 'section'];
-  const LAYOUTS = ['flow', 'rows', 'html'];
+  const LAYOUTS = ['flow', 'rows', 'ladder', 'html'];
 
   /* ------------------------------------------------------------------
      Helpers
@@ -87,7 +87,11 @@
     return max;
   }
   function applyStep(root, step) {
-    root.querySelectorAll('[data-step]').forEach(n => n.classList.toggle('on', Number(n.dataset.step) <= step));
+    root.querySelectorAll('[data-step]').forEach(n => {
+      const k = Number(n.dataset.step);
+      n.classList.toggle('on', k <= step);
+      n.classList.toggle('cur', k === step); // the build just revealed
+    });
   }
 
   /* ------------------------------------------------------------------
@@ -182,6 +186,16 @@
           rows.appendChild(row);
         });
         body.appendChild(rows);
+      } else if (c.layout === 'ladder') {
+        // First item is the bottom rung; each build climbs one rung.
+        const ladder = el('div', 'ladder');
+        items.forEach((item, i) => {
+          const rung = el('div', 'rung');
+          rung.dataset.step = i;
+          rung.append(el('div', 'rung-bar'), el('div', 'rung-num', pad2(i + 1)), el('div', 'rung-label', item));
+          ladder.appendChild(rung);
+        });
+        body.appendChild(ladder);
       } else if (c.layout === 'html') {
         body.classList.add('diagram-html');
         body.innerHTML = c.html || '';
@@ -229,7 +243,11 @@
         size = Math.max(min, size - 2);
         node.style.fontSize = size + 'px';
       }
-      if (node.offsetWidth > avail) node.classList.add('wrap');
+      if (node.offsetWidth > avail) {
+        // Too long for one line even at the minimum: two balanced lines, sized between min and max.
+        node.classList.add('wrap');
+        node.style.fontSize = Math.round((max + min) / 2) + 'px';
+      }
     });
   }
 

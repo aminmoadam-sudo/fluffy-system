@@ -27,12 +27,12 @@ const SECTIONS = [
 
    { type: 'statement', content: { text },                            notes, section }
    { type: 'image',     image: '<MEDIA key>', content: { caption? },  notes, section }
-   { type: 'diagram',   content: { title?, layout: 'flow'|'rows', items: [...] }, notes, section }
+   { type: 'diagram',   content: { title?, layout: 'flow'|'rows'|'ladder', items: [...] }, notes, section }
    { type: 'diagram',   content: { title?, layout: 'html', html: '<div data-step="1">…' }, notes, section }
    { type: 'stat',      content: { value, label?, source },           notes, section }
    { type: 'section',   content: { stage? },  (stage defaults to section)  notes, section }
 
-   Diagram reveal: flow/rows show the first item on arrival, then one more
+   Diagram reveal: flow/rows/ladder show the first item on arrival, then one more
    per keypress. In 'html', anything with data-step="n" appears on the nth
    press; anything without data-step is always visible.
    --------------------------------------------------------------------- */

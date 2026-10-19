@@ -76,12 +76,12 @@ body.idle, body.idle * { cursor: none !important; }
 .slide.static, .slide.static * { transition: none !important; }
 
 [data-fit] { display: inline-block; white-space: nowrap; flex-shrink: 0; }
-[data-fit].wrap { white-space: normal; text-wrap: balance; }
+[data-fit].wrap { white-space: normal; text-wrap: balance; flex-shrink: 1; max-width: 100%; }
 
 /* STATEMENT */
 .t-statement {
   display: flex; align-items: center; justify-content: center;
-  padding: 0 160px;
+  padding: 0 240px;
   text-align: center;
 }
 .statement-text {
@@ -155,6 +155,22 @@ body.idle, body.idle * { cursor: none !important; }
 .row:last-child { border-bottom: 1px solid var(--faint); }
 .row-num { font-size: 40px; font-weight: 500; color: var(--accent); font-variant-numeric: tabular-nums; width: 64px; }
 .row-text { font-size: 64px; font-weight: 600; letter-spacing: -0.025em; line-height: 1.1; }
+
+/* ladder: rails always present, rungs climb one per build */
+.ladder { position: relative; display: flex; flex-direction: column-reverse; }
+.ladder::before {
+  content: ''; position: absolute; left: 0; top: -72px; bottom: -72px; width: 200px;
+  border-left: 2px solid var(--dim); border-right: 2px solid var(--dim);
+}
+.rung { display: flex; align-items: center; height: 210px; }
+.rung-bar { width: 200px; height: 2px; background: var(--fg); flex-shrink: 0; }
+.rung-num {
+  margin-left: 80px; width: 88px;
+  font-size: 32px; font-weight: 500; color: var(--accent); font-variant-numeric: tabular-nums; letter-spacing: 0.02em;
+}
+.rung-label { font-size: 84px; font-weight: 600; letter-spacing: -0.03em; line-height: 1; white-space: nowrap; }
+.rung.on:not(.cur) .rung-label { color: var(--dim); }
+.rung.on:not(.cur) .rung-bar { background: var(--dim); }
 
 .diagram-html { font-size: 56px; }
 
