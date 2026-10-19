@@ -19,7 +19,7 @@
   const LINK_TIMEOUT_MS = 2500;
   const IS_PRESENTER = location.hash === '#presenter';
   const TYPES = ['image', 'statement', 'diagram', 'stat', 'section'];
-  const LAYOUTS = ['flow', 'rows', 'ladder', 'html'];
+  const LAYOUTS = ['flow', 'rows', 'stack', 'steps', 'boxes', 'ladder', 'html'];
 
   /* ------------------------------------------------------------------
      Helpers
@@ -58,10 +58,10 @@
       const n = `Slide ${i + 1}`;
       const c = s.content || {};
       if (!TYPES.includes(s.type)) problems.push(`${n}: unknown type "${s.type}"`);
-      if (s.type === 'image' && !MEDIA[s.image]) problems.push(`${n}: image "${s.image}" is not in MEDIA`);
+      if (s.type === 'image') [].concat(s.image).forEach(k => { if (!MEDIA[k]) problems.push(`${n}: image "${k}" is not in MEDIA`); });
       if (s.type === 'diagram' && !LAYOUTS.includes(c.layout)) problems.push(`${n}: diagram layout "${c.layout}" is not one of ${LAYOUTS.join(', ')}`);
       if (s.section && sectionIndex(s.section) < 0) problems.push(`${n}: section "${s.section}" is not in SECTIONS`);
-      if (s.type === 'section' && sectionIndex(c.stage || s.section) < 0) problems.push(`${n}: section slide has no valid stage`);
+      if (s.type === 'section' && !['all', 'none'].includes(c.stage) && sectionIndex(c.stage || s.section) < 0) problems.push(`${n}: section slide has no valid stage`);
     });
     problems.forEach(p => console.warn('[deck] ' + p));
     return problems;
@@ -81,10 +81,21 @@
       t.innerHTML = c.html || '';
       t.content.querySelectorAll('[data-step]').forEach(n => { max = Math.max(max, Number(n.dataset.step) || 0); });
     } else {
-      max = Math.max(0, (c.items || []).length - 1);
+      const steps = itemSteps(c).filter(v => v != null);
+      max = Math.max(0, ...steps) + (c.footer && isStaged(c) ? 1 : 0);
     }
     stepCache.set(slide, max);
     return max;
+  }
+  // Diagram items build one per press unless the slide singles one out (lit)
+  // or opts out (staged: false). `from` items are already there on arrival;
+  // items at or past `until` never appear. null = never shown.
+  const isStaged = c => c.staged !== false && c.lit == null;
+  function itemSteps(c) {
+    const n = (c.items || []).length;
+    const from = Math.max(1, c.from || 1);
+    const until = Math.min(n, c.until || n);
+    return (c.items || []).map((_, i) => (i >= until ? null : isStaged(c) ? Math.max(0, i - from + 1) : 0));
   }
   function applyStep(root, step) {
     root.querySelectorAll('[data-step]').forEach(n => {
@@ -128,34 +139,45 @@
     return node;
   }
 
+  // One image slot at its MEDIA aspect ratio, as large as fits maxW × maxH.
+  function imageSlot(key, maxW, maxH) {
+    const m = MEDIA[key] || { file: '', ratio: '16:9', label: `Missing MEDIA key "${key}"` };
+    const ratio = parseRatio(m.ratio);
+    let w = maxW, h = maxW / ratio;
+    if (h > maxH) { h = maxH; w = maxH * ratio; }
+    const slot = el('div', 'img-slot');
+    slot.style.width = w + 'px';
+    slot.style.height = h + 'px';
+    const rec = IMG[key];
+    if (rec && rec.state === 'ok') {
+      fillImage(slot, m);
+    } else {
+      const ph = el('div', 'img-placeholder');
+      ph.append(
+        el('div', 'ph-label', m.label || key),
+        el('div', 'ph-meta', `images/${m.file || '—'}  ·  ${m.ratio || '16:9'}`)
+      );
+      slot.appendChild(ph);
+      if (rec && rec.state === 'pending') rec.waiters.push(() => fillImage(slot, m));
+    }
+    return slot;
+  }
+
   const RENDER = {
     statement(root, slide, c) {
       root.appendChild(fitBox(el('div', 'statement-text', c.text || ''), 130, 90));
     },
 
     image(root, slide, c) {
-      const key = slide.image;
-      const m = MEDIA[key] || { file: '', ratio: '16:9', label: `Missing MEDIA key "${key}"` };
-      const ratio = parseRatio(m.ratio);
-      let w = W, h = W / ratio;
-      if (h > H) { h = H; w = H * ratio; }
-      const slot = el('div', 'img-slot');
-      slot.style.width = w + 'px';
-      slot.style.height = h + 'px';
-
-      const rec = IMG[key];
-      if (rec && rec.state === 'ok') {
-        fillImage(slot, m);
-      } else {
-        const ph = el('div', 'img-placeholder');
-        ph.append(
-          el('div', 'ph-label', m.label || key),
-          el('div', 'ph-meta', `images/${m.file || '—'}  ·  ${m.ratio || '16:9'}`)
-        );
-        slot.appendChild(ph);
-        if (rec && rec.state === 'pending') rec.waiters.push(() => fillImage(slot, m));
-      }
-      root.appendChild(slot);
+      // One image fills the slide; a pair sits side by side.
+      const keys = Array.isArray(slide.image) ? slide.image : [slide.image];
+      const gap = keys.length > 1 ? 80 : 0;
+      const boxW = (W - gap * (keys.length + 1)) / keys.length;
+      const boxH = keys.length > 1 ? H - 2 * gap : H;
+      const row = el('div', 'img-row');
+      row.style.gap = gap + 'px';
+      keys.forEach(key => row.appendChild(imageSlot(key, boxW, boxH)));
+      root.appendChild(row);
       if (c.caption) root.appendChild(el('div', 'img-caption', c.caption));
     },
 
@@ -163,25 +185,31 @@
       if (c.title) root.appendChild(el('div', 'diagram-title', c.title));
       const body = el('div', 'diagram-body');
       const items = c.items || [];
+      const steps = itemSteps(c);
+      // Mark an item with its build, and with lit/dimmed when one item is singled out.
+      const mark = (node, i) => {
+        if (steps[i] != null) node.dataset.step = steps[i];
+        if (c.lit != null) node.classList.add(i === c.lit ? 'lit' : 'dimmed');
+        return node;
+      };
+
       if (c.layout === 'flow') {
         const flow = fitBox(el('div', 'flow'), 80, 40);
         items.forEach((item, i) => {
           if (i > 0) {
             const arrow = el('div', 'flow-arrow');
-            arrow.dataset.step = i;
+            if (steps[i] != null) arrow.dataset.step = steps[i];
             flow.appendChild(arrow);
           }
-          const node = el('div', 'flow-node');
-          node.dataset.step = i;
+          const node = mark(el('div', 'flow-node'), i);
           node.append(el('div', 'flow-num', pad2(i + 1)), el('div', 'flow-label', item));
           flow.appendChild(node);
         });
         body.appendChild(flow);
       } else if (c.layout === 'rows') {
-        const rows = el('div', 'rows');
+        const rows = el('div', 'rows' + (c.compact ? ' compact' : ''));
         items.forEach((item, i) => {
-          const row = el('div', 'row');
-          row.dataset.step = i;
+          const row = mark(el('div', 'row'), i);
           row.append(el('div', 'row-num', pad2(i + 1)), el('div', 'row-text', item));
           rows.appendChild(row);
         });
@@ -189,13 +217,49 @@
       } else if (c.layout === 'ladder') {
         // First item is the bottom rung; each build climbs one rung.
         const ladder = el('div', 'ladder');
+        ladder.style.setProperty('--rung', (items.length > 3 ? 170 : 210) + 'px');
         items.forEach((item, i) => {
-          const rung = el('div', 'rung');
-          rung.dataset.step = i;
+          const rung = mark(el('div', 'rung'), i);
           rung.append(el('div', 'rung-bar'), el('div', 'rung-num', pad2(i + 1)), el('div', 'rung-label', item));
           ladder.appendChild(rung);
         });
         body.appendChild(ladder);
+      } else if (c.layout === 'stack') {
+        const stack = fitBox(el('div', 'stack'), 120, 64);
+        items.forEach((item, i) => stack.appendChild(mark(el('div', 'stack-item', item), i)));
+        body.appendChild(stack);
+      } else if (c.layout === 'steps') {
+        const grid = el('div', 'steps');
+        grid.style.gridTemplateColumns = `repeat(${c.cols || items.length}, 1fr)`;
+        items.forEach((item, i) => {
+          const cell = mark(el('div', 'step-cell'), i);
+          cell.append(el('div', 'step-num', pad2(i + 1)), el('div', 'step-label', item));
+          grid.appendChild(cell);
+        });
+        body.appendChild(grid);
+      } else if (c.layout === 'boxes') {
+        // Every outline is there on arrival; labels fill in build by build.
+        // Items past `until` stay as empty outlines.
+        const wrap = el('div', 'boxes-wrap');
+        const row = el('div', 'boxes');
+        items.forEach((item, i) => {
+          if (i > 0 && c.arrows) row.appendChild(el('div', 'box-arrow'));
+          const box = el('div', 'box' + (steps[i] == null ? ' ghost' : ''));
+          if (c.lit != null) box.classList.add(i === c.lit ? 'lit' : 'dimmed');
+          if (steps[i] != null) {
+            const label = el('div', 'box-label', item);
+            label.dataset.step = steps[i];
+            box.appendChild(label);
+          }
+          row.appendChild(box);
+        });
+        wrap.appendChild(row);
+        if (c.footer) {
+          const foot = el('div', 'boxes-footer', c.footer);
+          foot.dataset.step = isStaged(c) ? Math.max(0, ...steps.filter(v => v != null)) + 1 : 0;
+          wrap.appendChild(foot);
+        }
+        body.appendChild(wrap);
       } else if (c.layout === 'html') {
         body.classList.add('diagram-html');
         body.innerHTML = c.html || '';
@@ -210,11 +274,15 @@
     },
 
     section(root, slide, c) {
-      const lit = sectionIndex(c.stage || slide.section);
+      // stage: a spine key lights that stage; 'all' lights every stage; 'none' lights nothing.
+      const spineSecs = SECTIONS.filter(s => s.spine !== false);
+      const stage = c.stage || slide.section;
+      const lit = spineSecs.findIndex(s => s.key === stage);
       const spine = fitBox(el('div', 'spine'), 104, 64);
-      SECTIONS.forEach((s, i) => {
+      spineSecs.forEach((s, i) => {
         if (i > 0) spine.appendChild(el('div', 'spine-arrow'));
-        spine.appendChild(el('div', 'spine-stage' + (i === lit ? ' lit' : i < lit ? ' past' : ''), s.label));
+        const cls = stage === 'all' || i === lit ? ' lit' : stage === 'none' ? ' even' : lit >= 0 && i < lit ? ' past' : '';
+        spine.appendChild(el('div', 'spine-stage' + cls, s.label));
       });
       root.appendChild(spine);
     },
