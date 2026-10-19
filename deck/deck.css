@@ -11,13 +11,15 @@
 }
 
 :root {
+  /* CTP brand is monochrome (design/design-system.html): no hue anywhere.
+     "Accent" is brightness: lit states and stat numbers go to pure white. */
   --bg: #0A0A0B;
   --fg: #F2F2F0;
-  --accent: #D08A2E;    /* deep amber: active states and numbers only */
-  --muted: #8C8C88;
-  --dim: #55554F;
-  --faint: #2A2A2B;
-  --well: #121213;
+  --accent: #FFFFFF;    /* active states and stat numbers only */
+  --muted: #8C8C8C;     /* brand gray-400 */
+  --dim: #4D4D4D;       /* brand gray-600 */
+  --faint: #2A2A2A;     /* brand border */
+  --well: #161616;      /* brand surface-2 */
   --fade: 150ms;        /* set from FADE_MS in engine.js */
   --font: 'InterDeck', 'Inter', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif;
 }
@@ -124,7 +126,7 @@ body.idle, body.idle * { cursor: none !important; }
 .flow { display: inline-flex; align-items: center; font-size: 80px; }
 .flow-node { display: flex; flex-direction: column; gap: 24px; }
 .flow-num {
-  font-size: 32px; font-weight: 500; color: var(--accent);
+  font-size: 32px; font-weight: 500; color: var(--muted);
   font-variant-numeric: tabular-nums; letter-spacing: 0.02em;
 }
 .flow-label { font-size: 1em; font-weight: 600; letter-spacing: -0.03em; line-height: 1; }
@@ -153,7 +155,7 @@ body.idle, body.idle * { cursor: none !important; }
   border-top: 1px solid var(--faint);
 }
 .row:last-child { border-bottom: 1px solid var(--faint); }
-.row-num { font-size: 40px; font-weight: 500; color: var(--accent); font-variant-numeric: tabular-nums; width: 64px; }
+.row-num { font-size: 40px; font-weight: 500; color: var(--muted); font-variant-numeric: tabular-nums; width: 64px; }
 .row-text { font-size: 64px; font-weight: 600; letter-spacing: -0.025em; line-height: 1.1; }
 
 /* ladder: rails always present, rungs climb one per build */
@@ -166,7 +168,7 @@ body.idle, body.idle * { cursor: none !important; }
 .rung-bar { width: 200px; height: 2px; background: var(--fg); flex-shrink: 0; }
 .rung-num {
   margin-left: 80px; width: 88px;
-  font-size: 32px; font-weight: 500; color: var(--accent); font-variant-numeric: tabular-nums; letter-spacing: 0.02em;
+  font-size: 32px; font-weight: 500; color: var(--muted); font-variant-numeric: tabular-nums; letter-spacing: 0.02em;
 }
 .rung-label { font-size: 84px; font-weight: 600; letter-spacing: -0.03em; line-height: 1; white-space: nowrap; }
 .rung.on:not(.cur) .rung-label { color: var(--dim); }
@@ -289,11 +291,11 @@ body.idle, body.idle * { cursor: none !important; }
 .p-section { font-size: 20px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; }
 .p-range { font-size: 18px; color: var(--muted); font-variant-numeric: tabular-nums; margin-top: 6px; }
 .p-pace { font-size: 24px; font-weight: 500; margin-top: 10px; font-variant-numeric: tabular-nums; }
-.p-pace.over { color: var(--accent); }
+.p-pace.over { display: inline-block; background: var(--accent); color: var(--bg); padding: 2px 10px; }
 
 .p-foot { margin-top: auto; display: flex; flex-direction: column; gap: 10px; }
 .p-link { font-size: 14px; color: var(--muted); }
-.p-link.down { color: var(--accent); }
+.p-link.down { align-self: flex-start; background: var(--accent); color: var(--bg); padding: 4px 10px; }
 .p-keys { font-size: 12px; color: var(--dim); letter-spacing: 0.02em; line-height: 1.6; }
 
 /* ---------------------------------------------------------------------
